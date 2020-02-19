@@ -1,0 +1,48 @@
+Sub vbastock()
+
+Range("i1") = "Ticker"
+Range("j1") = "Yearly Change"
+Range("K1") = "Percent Change"
+Range("j1") = "Total Stock Volume"
+
+Range("O2") = "Greatest % increase"
+Range("O2") = "Greatest % decrease"
+Range("O2") = "Greatest total volume"
+Range("p1") = "Ticker"
+Range("q1") = "value"
+
+
+lastrow = ActiveSheet.UsedRange.Rows.Count
+tickercount = 0
+totalvolume = 0
+
+For i = 2 To lastrow
+If Cells(i + 1, 1) <> Cells(i, 1) Then
+Cells(tickercount + 1, 9) = Cells(i, 1)
+End If
+tickercount = tickercount + 1
+totalvolume = totalvolume + Cells(i, 7)
+Next i
+
+Columns("a:a").Insert Shift:=xlToRight
+For i = 2 To lastrow
+Cells(i, 1).Formula = Cells(i, 2).Value & Cells(i, 3).Value
+
+openprice = Application.VLookup(Cells(tickercount + 2, 9) & "20160101", Range("a:h"), 4)
+closeprice = Application.VLookup(Cells(tickercount + 2, 9) & "20161231", Range("a:h"), 4)
+
+yearlychange = closeprice / openprice
+percentagechange = closeprice / openprice - 1
+
+On Error GoTo 0
+
+Cells(tickercount + 2, 10).Value = yearlychange
+Cells(tickercount + 2, 11).Value = percentagechange
+Cells(tickercount + 2, 12).Value = totalvolume
+
+Next i
+
+Columns("A").Delete
+
+
+End Sub
