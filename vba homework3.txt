@@ -1,0 +1,63 @@
+Sub vbastock()
+
+Range("i1") = "Ticker"
+Range("j1") = "Yearly Change"
+Range("K1") = "Percent Change"
+Range("j1") = "Total Stock Volume"
+
+Range("O2") = "Greatest % increase"
+Range("O2") = "Greatest % decrease"
+Range("O2") = "Greatest total volume"
+Range("p1") = "Ticker"
+Range("q1") = "value"
+
+
+lastrow = ActiveSheet.UsedRange.Rows.Count
+
+totalvolume = 0
+uniqueuniquetickercount = 0
+
+For i = 2 To lastrow
+If Cells(i + 1, 1) <> Cells(i, 1) Then
+Cells(uniquetickercount + 2, 9).Value = Cells(i, 1).Value
+totalvolume = 0
+uniquetickercount = uniquetickercount + 1
+totalvolume = totalvolume + Cells(i, 7).Value
+Else
+totalvolume = totalvolume + Cells(i + 1, 7).Value
+Cells(uniquetickercount + 2, 12).Value = totalvolume
+
+End If
+Next i
+
+
+Range("A:A").Insert
+lastrownew = Cells(Rows.Count, 2).End(xlUp).Row
+
+Range("A1") = "INDEX"
+Range(Cells(2, 1), Cells(lastrownew, 17)).Formula = "=B2&C2"
+Range(Cells(2, 1), Cells(lastrownew, 17)).Value = Range(Cells(2, 1), Cells(lastrow, 1)).Value
+
+tickerlastrow = Cells(Rows.Count, 10).End(xlUp).Row
+  For t = 2 To tickerlastrow
+  ticker = Cells(t, 10).Value
+  BOY = 20160101
+  EOY = 20161231
+  Cells(t, 14).Value = Application.WorksheetFunction.VLookup(ticker & BOY, Range("A:G"), 4, 0)
+  Cells(t, 15).Value = Application.WorksheetFunction.VLookup(ticker & EOY, Range("A:G"), 7, 0)
+  On Error Resume Next
+    
+  
+  openprice = Cells(t, 14).Value
+  closeprice = Cells(t, 15).Value
+  
+  Cells(t, 11).Value = closeprice - openprice
+  Cells(t, 12).Value = closeprice / openprice - 1
+On Error GoTo 0
+
+Next t
+
+
+Columns("A:A").EntireColumn.Delete
+
+End Sub
