@@ -1,63 +1,100 @@
 Sub vbastock()
 
-Range("i1") = "Ticker"
-Range("j1") = "Yearly Change"
-Range("K1") = "Percent Change"
-Range("j1") = "Total Stock Volume"
+For Each ws In Worksheets
 
-Range("O2") = "Greatest % increase"
-Range("O2") = "Greatest % decrease"
-Range("O2") = "Greatest total volume"
-Range("p1") = "Ticker"
-Range("q1") = "value"
+ws.Range("i1") = "Ticker"
+ws.Range("j1") = "Yearly Change"
+ws.Range("K1") = "Percent Change"
+ws.Range("L1") = "Total Stock Volume"
 
 
-lastrow = ActiveSheet.UsedRange.Rows.Count
+ws.Range("O2") = "Greatest % increase"
+ws.Range("O3") = "Greatest % decrease"
+ws.Range("O4") = "Greatest total volume"
+ws.Range("p1") = "Ticker"
+ws.Range("q1") = "value"
+
+
+lastrow = ws.UsedRange.Rows.Count
 
 totalvolume = 0
 uniqueuniquetickercount = 0
 
 For i = 2 To lastrow
-If Cells(i + 1, 1) <> Cells(i, 1) Then
-Cells(uniquetickercount + 2, 9).Value = Cells(i, 1).Value
+If ws.Cells(i + 1, 1) <> ws.Cells(i, 1) Then
+ws.Cells(uniquetickercount + 2, 9).Value = ws.Cells(i, 1).Value
 totalvolume = 0
 uniquetickercount = uniquetickercount + 1
-totalvolume = totalvolume + Cells(i, 7).Value
+totalvolume = totalvolume + ws.Cells(i, 7).Value
 Else
-totalvolume = totalvolume + Cells(i + 1, 7).Value
-Cells(uniquetickercount + 2, 12).Value = totalvolume
+totalvolume = totalvolume + ws.Cells(i + 1, 7).Value
+ws.Cells(uniquetickercount + 2, 12).Value = totalvolume
 
 End If
 Next i
 
 
-Range("A:A").Insert
-lastrownew = Cells(Rows.Count, 2).End(xlUp).Row
+ws.Columns("a:a").Insert Shift:=xlToRight
+lastrownew = ws.Cells(Rows.Count, 2).End(xlUp).Row
 
-Range("A1") = "INDEX"
-Range(Cells(2, 1), Cells(lastrownew, 17)).Formula = "=B2&C2"
-Range(Cells(2, 1), Cells(lastrownew, 17)).Value = Range(Cells(2, 1), Cells(lastrow, 1)).Value
+ws.Range("A1") = "INDEX"
+ws.Range(ws.Cells(2, 1), ws.Cells(lastrownew, 1)).Formula = "=B2&C2"
+ws.Range(ws.Cells(2, 1), ws.Cells(lastrownew, 1)).Value = ws.Range(ws.Cells(2, 1), ws.Cells(lastrow, 1)).Value
 
-tickerlastrow = Cells(Rows.Count, 10).End(xlUp).Row
+tickerlastrow = ws.Cells(Rows.Count, 10).End(xlUp).Row
   For t = 2 To tickerlastrow
-  ticker = Cells(t, 10).Value
-  BOY = 20160101
-  EOY = 20161231
-  Cells(t, 14).Value = Application.WorksheetFunction.VLookup(ticker & BOY, Range("A:G"), 4, 0)
-  Cells(t, 15).Value = Application.WorksheetFunction.VLookup(ticker & EOY, Range("A:G"), 7, 0)
-  On Error Resume Next
-    
-  
-  openprice = Cells(t, 14).Value
-  closeprice = Cells(t, 15).Value
-  
-  Cells(t, 11).Value = closeprice - openprice
-  Cells(t, 12).Value = closeprice / openprice - 1
-On Error GoTo 0
+    ticker = ws.Cells(t, 10).Value
+     Set DateRange = ws.Range("C:C")
+      BOY = Application.WorksheetFunction.Min(DateRange)
+      EOY = Application.WorksheetFunction.Max(DateRange)
+      
+      On Error Resume Next
+      ws.Cells(t, 14).Value = Application.WorksheetFunction.VLookup(ticker & BOY, ws.Range("A:G"), 4, 0)
+      On Error Resume Next
+      ws.Cells(t, 15).Value = Application.WorksheetFunction.VLookup(ticker & EOY, ws.Range("A:G"), 7, 0)
+      
+      
+      openprice = ws.Cells(t, 14).Value
+      closeprice = ws.Cells(t, 15).Value
+      
+      ws.Cells(t, 11).Value = closeprice - openprice
+      ws.Cells(t, 12).Value = closeprice / openprice - 1
+    On Error GoTo 0
+
+'format change%
+If ws.Cells(t, 12) > 0 Then
+ws.Cells(t, 12).Interior.ColorIndex = 3
+ElseIf ws.Cells(t, 12).Value < 0 Then
+ws.Cells(t, 12).Interior.ColorIndex = 4
+Else
+End If
 
 Next t
 
 
-Columns("A:A").EntireColumn.Delete
+ws.Columns("A").EntireColumn.Delete
+ws.Columns("M:N").Clear
+ws.Range("I:L").RemoveDuplicates Columns:=Array(1, 2, 3, 4), Header:=xlYes
+
+'recap chart
+Set ttlvolumerange = ws.Range("L:L")
+    ws.Range("Q4") = Application.WorksheetFunction.Max(ttlvolumerange)
+    On Error Resume Next
+    ttlvolumeaddress = Application.WorksheetFunction.Match(ws.Range("Q4").Value, ttlvolumerange, 0)
+    ws.Range("p4") = ws.Range("I" & ttlvolumeaddress)
+Set changepercentagerange = ws.Range("K:K")
+    ws.Range("Q3") = Application.WorksheetFunction.Min(changepercentagerange)
+    On Error Resume Next
+    maxdecreaseaddress = Application.WorksheetFunction.Match(ws.Range("Q3").Value, changepercentagerange, 0)
+    ws.Range("p3") = ws.Range("I" & maxdecreaseaddress)
+    
+    ws.Range("Q2") = Application.WorksheetFunction.Max(changepercentagerange)
+    On Error Resume Next
+    maxincreaseaddress = Application.WorksheetFunction.Match(ws.Range("Q2").Value, changepercentagerange, 0)
+    ws.Range("p2") = ws.Range("I" & maxincreaseaddress)
+    
+
+Next ws
 
 End Sub
+
