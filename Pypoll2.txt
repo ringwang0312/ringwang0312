@@ -1,0 +1,28 @@
+import csv
+pollpath=bankpath='C:/Users/rwang/Desktop/CU-NYC-DATA-PT-02-2020-U-C/03-Python/homework/assignment/PyPoll/Resources/election_data.csv'
+
+with open(pollpath,'r') as pollfile:
+    polldata = list(csv.reader(pollfile, delimiter=','))
+    polldata.remove(polldata[0])
+    rowcount = len(polldata)
+    print("Election Results")
+    print("-------------------------")
+    print("Total Votes: :"+str(rowcount) if rowcount else 'Empty')
+    print("-------------------------")
+
+def candidate(val): 
+    return val[2]
+polldata.sort(key=candidate,reverse=False)
+polldata
+
+
+candidatedata = []
+votecount=0
+for i in range(len(polldata)):
+    currentrow=candidatedata[i]
+    nextrow=candidatedata[i+1]
+if nextrow[2] != currentrow[2]:
+        votecount=1
+        candidatedata.append([nextrow[2],votecount])
+else:
+        votecount=votecount+1
